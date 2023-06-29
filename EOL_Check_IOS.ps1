@@ -6,22 +6,22 @@ if (-not (Get-Module -Name Microsoft.Graph.Intune)) {
 # Authenticate to Microsoft Graph
 Connect-MSGraph
 
-# Get all iPads enrolled in Intune
-$ipads = Get-IntuneManagedDevice | Where-Object {$_.deviceType -eq "iPad"}
+# Get all iOS devices enrolled in Intune
+$iosDevices = Get-IntuneManagedDevice | Get-MSGraphAllPages | Where-Object { $_.operatingSystem -EQ "iOS" -and $_.managedDeviceOwnerType -EQ "company" }
 
 # Get current date
 $currentDate = Get-Date
 
-# Iterate through each iPad
-foreach ($ipad in $ipads) {
-    $enrollmentDate = $ipad.enrolledDateTime.DateTime
+# Iterate through each iOS device
+foreach ($device in $iosDevices) {
+    $enrollmentDate = $device.enrolledDateTime.DateTime
     $age = $currentDate.Year - $enrollmentDate.Year
 
-    # Check if the iPad is older than 2 years
+    # Check if the device is older than 2 years
     if ($age -ge 2) {
-        Write-Host "iPad $($ipad.deviceName) is older than 2 years. Replacement needed."
+        Write-Host "Device $($device.deviceName) is older than 2 years. Replacement needed."
         # Add code here to initiate the replacement process
     } else {
-        Write-Host "iPad $($ipad.deviceName) is within 2 years."
+        Write-Host "Device $($device.deviceName) is within 2 years."
     }
 }
